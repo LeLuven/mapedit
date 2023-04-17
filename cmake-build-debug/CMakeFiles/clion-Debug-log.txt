@@ -1,0 +1,34 @@
+/home/user/.local/share/JetBrains/Toolbox/apps/CLion/ch-0/231.8109.222/bin/cmake/linux/x64/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/home/user/.local/share/JetBrains/Toolbox/apps/CLion/ch-0/231.8109.222/bin/ninja/linux/x64/ninja -G Ninja -S /home/user/CLionProjects/mapEditor -B /home/user/CLionProjects/mapEditor/cmake-build-debug
+
+-- CMAKE_BINARY_DIR: /home/user/CLionProjects/mapEditor/cmake-build-debug
+-- CMAKE_SOURCE_DIR: /home/user/CLionProjects/mapEditor
+-- CMAKE_COMMAND: /home/user/.local/share/JetBrains/Toolbox/apps/CLion/ch-0/231.8109.222/bin/cmake/linux/x64/bin/cmake
+-- CMAKE_VERSION: 3.25.2
+-- CMAKE_C_COMPILER: /usr/bin/cc
+-- CMAKE_PROJECT_NAME: Blocked
+-- CMAKE_FINDCMAKE: /home/user/CLionProjects/mapEditor/CMAKE
+
+-- SOURCE entry point : main.cpp
+
+
+-- FINDING SDL2
+-- SDL2_FOUND: TRUE
+-- SDL2_INCLUDE_DIR:/usr/include/SDL2
+-- SDL2_LIBRARY: /usr/lib/x86_64-linux-gnu/libSDL2main.a/usr/lib/x86_64-linux-gnu/libSDL2.so
+
+-- FINDING SDL2_IMAGE
+-- SDL2_IMAGE_FOUND: TRUE
+-- SDL2_IMAGE_INCLUDE_DIR: /usr/include/SDL2
+-- SDL2_IMAGE_LIBRARY: /usr/lib/x86_64-linux-gnu/libSDL2_image.so
+
+-- FINDING SDL2TTF
+-- SDL2TTF_FOUND: TRUE
+-- SDL2TTF_INCLUDE_DIR: /usr/include/SDL2
+-- SDL2TTF_LIBRARY: /usr/lib/x86_64-linux-gnu/libSDL2_ttf.so/usr/lib/x86_64-linux-gnu/libSDL2_ttf.so
+
+-- FINDING SDL2Mixer
+-- SDL2Mixer_FOUND: TRUE
+
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/user/CLionProjects/mapEditor/cmake-build-debug
