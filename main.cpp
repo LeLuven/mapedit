@@ -3,11 +3,13 @@
 #include <iostream>
 #include <array>
 #include <vector>
+#include <fstream>
 
 using namespace std;
 
 const int TILE_SIZE = 32;
-const int MAPSIZE = 15;
+const int MAPSIZE = 10;
+const char del = ',';
 int imgW, imgH;
 
 SDL_Texture *loadTexture(const std::string &path, SDL_Renderer *renderer) {
@@ -25,8 +27,57 @@ SDL_Texture *loadTexture(const std::string &path, SDL_Renderer *renderer) {
     return texture;
 }
 
-bool isFirstLast(int x, int y){
-    return (x == 0 || x == (MAPSIZE-1) || y == 0 || y == (MAPSIZE-1));
+void convertToFile(SDL_Point arr[MAPSIZE][MAPSIZE]) {
+    std::string output = "";
+    int index;
+    for (int y = 0; y < MAPSIZE; y++) {
+        for (int x = 0; x < MAPSIZE; x++) {
+            index = (arr[x][y].x / 32) + (arr[x][y].y / 32) * 9;
+            output += to_string(index) + ",";
+        }
+        output.pop_back();
+        output += "\n";
+    }
+    std::ofstream outFile("output.txt");
+
+    if (outFile.is_open()) {
+        outFile << output;
+        outFile.close();
+        std::cout << "Text file has been created/overwritten with the content." << std::endl;
+    } else {
+        std::cerr << "Unable to open the file." << std::endl;
+    }
+}
+
+//SDL_Point *
+void loadFile(SDL_Point arr[MAPSIZE][MAPSIZE], char deli) {
+    std::ifstream file("output.txt");
+
+    if (file.is_open()) {
+        std::string line;
+        int x, y;
+
+        for (y = 0; y < MAPSIZE; y++) {
+            for (x = 0; x < MAPSIZE; x++) {
+                if (x < MAPSIZE - 1) {
+                    std::getline(file, line, deli);
+                } else {
+                    std::getline(file, line);
+                }
+                int index = std::stoi(line);
+                arr[x][y].x = (index % 9) * 32;
+                arr[x][y].y = (index / 9) * 32;
+            }
+        }
+
+        file.close();
+    } else {
+        std::cerr << "Unable to open the file." << std::endl;
+    }
+}
+
+bool isFirstLast(int x, int y) {
+    return (x == 0 || x == (MAPSIZE - 1) || y == 0 || y == (MAPSIZE - 1));
 }
 
 extern "C"
@@ -51,6 +102,7 @@ int main(int argc, char *args[]) {
     SDL_Point mapPoint[MAPSIZE][MAPSIZE];
     SDL_Rect mapRect[MAPSIZE][MAPSIZE];
 
+
     for (int y = 0; y < MAPSIZE; y++) {
         for (int x = 0; x < MAPSIZE; x++) {
             mapRect[x][y] = {x * TILE_SIZE + imgW, y * TILE_SIZE, TILE_SIZE, TILE_SIZE};
@@ -59,6 +111,7 @@ int main(int argc, char *args[]) {
         }
     }
 
+
     bool quit = false;
     SDL_Event e;
 
@@ -66,16 +119,20 @@ int main(int argc, char *args[]) {
         while (SDL_PollEvent(&e) != 0) {
             if (e.type == SDL_QUIT) {
                 quit = true;
-            } else if (e.type == SDL_MOUSEMOTION && (SDL_GetModState() & KMOD_SHIFT)){
+            } else if (e.type == SDL_MOUSEMOTION && (SDL_GetModState() & KMOD_SHIFT)) {
                 for (int y = 0; y < MAPSIZE; y++) {
                     for (int x = 0; x < MAPSIZE; x++) {
-                       mapRect[x][y].x += e.motion.xrel;
-                        mapRect[x][y].y +=e.motion.yrel;
+                        mapRect[x][y].x += e.motion.xrel;
+                        mapRect[x][y].y += e.motion.yrel;
                     }
                 }
 
+            } else if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_p) {
+                convertToFile(mapPoint);
             }
-
+            else if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_l) {
+                loadFile(mapPoint,del);
+            }
 
         }
 
@@ -109,9 +166,9 @@ int main(int argc, char *args[]) {
             for (int x = 0; x < MAPSIZE; x++) {
                 srcRect.x = mapPoint[x][y].x;
                 srcRect.y = mapPoint[x][y].y;
-                if(isFirstLast(x,y)){
-                    srcRect.x = 32;
-                    srcRect.y = 6 * 32;
+                if (isFirstLast(x, y)) {
+                    mapPoint[x][y].x = srcRect.x = 32;
+                    mapPoint[x][y].y = srcRect.y = 6 * 32;
                 }
                 SDL_RenderCopy(renderer, tilemapTexture, &srcRect, &mapRect[x][y]);
             }
