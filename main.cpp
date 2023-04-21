@@ -1,14 +1,14 @@
 #include <SDL.h>
 #include <SDL_image.h>
 #include <iostream>
-#include <array>
-#include <vector>
 #include <fstream>
 
 using namespace std;
 
 const int TILE_SIZE = 32;
-const int MAPSIZE = 10;
+const int MAPSIZE = 16;
+const int SCREENW = 1000;
+const int SCREENH = 600;
 const char del = ',';
 int imgW, imgH;
 
@@ -25,6 +25,18 @@ SDL_Texture *loadTexture(const std::string &path, SDL_Renderer *renderer) {
     }
 
     return texture;
+}
+
+bool isDirt(SDL_Point p){
+    return (p.x == 32 && p.y == 224);
+}
+
+bool isWall(SDL_Point p){
+    return(p.x == 32 && p.y == 192);
+}
+
+void mine(SDL_Point arr[MAPSIZE][MAPSIZE]){
+
 }
 
 void convertToFile(SDL_Point arr[MAPSIZE][MAPSIZE]) {
@@ -49,7 +61,7 @@ void convertToFile(SDL_Point arr[MAPSIZE][MAPSIZE]) {
     }
 }
 
-//SDL_Point *
+
 void loadFile(SDL_Point arr[MAPSIZE][MAPSIZE], char deli) {
     std::ifstream file("output.txt");
 
@@ -85,7 +97,7 @@ int main(int argc, char *args[]) {
     SDL_Init(SDL_INIT_VIDEO);
     IMG_Init(IMG_INIT_PNG);
 
-    SDL_Window *window = SDL_CreateWindow("Tile Selector", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 1000, 600,
+    SDL_Window *window = SDL_CreateWindow("Tile Selector", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREENW, SCREENH,
                                           SDL_WINDOW_SHOWN);
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
@@ -113,51 +125,64 @@ int main(int argc, char *args[]) {
 
 
     bool quit = false;
+    bool play = false;
     SDL_Event e;
 
     while (!quit) {
         while (SDL_PollEvent(&e) != 0) {
             if (e.type == SDL_QUIT) {
                 quit = true;
-            } else if (e.type == SDL_MOUSEMOTION && (SDL_GetModState() & KMOD_SHIFT)) {
+            } else if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_p) {
+                play = !play;
+                const int xP = SCREENW/2 - (MAPSIZE/2)*32;
+                const int yP = SCREENH/2 - (MAPSIZE/2)*32;
                 for (int y = 0; y < MAPSIZE; y++) {
                     for (int x = 0; x < MAPSIZE; x++) {
-                        mapRect[x][y].x += e.motion.xrel;
-                        mapRect[x][y].y += e.motion.yrel;
+                        mapRect[x][y].x = xP + x*32;
+                        mapRect[x][y].y = yP + y*32;
                     }
                 }
-
-            } else if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_p) {
-                convertToFile(mapPoint);
-            }
-            else if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_l) {
-                loadFile(mapPoint,del);
-            }
-
-        }
-
-        Uint32 mouseState = SDL_GetMouseState(NULL, NULL);
-        if (mouseState & SDL_BUTTON(SDL_BUTTON_LEFT)) {
-            int x, y;
-            SDL_GetMouseState(&x, &y);
-            mouse.x = x;
-            mouse.y = y;
-
-            if (x >= 0 && x <= imgW && y >= 0 && y <= imgH) {
-                cout << x / TILE_SIZE << ":" << y / TILE_SIZE << endl;
-                selectcRect.x = (x / TILE_SIZE) * TILE_SIZE;
-                selectcRect.y = (y / TILE_SIZE) * TILE_SIZE;
-            }
-
-            for (int y = 0; y < MAPSIZE; y++) {
-                for (int x = 0; x < MAPSIZE; x++) {
-                    if (SDL_PointInRect(&mouse, &mapRect[x][y])) {
-                        mapPoint[x][y].x = selectcRect.x;
-                        mapPoint[x][y].y = selectcRect.y;
+            } else if (!play) {
+                if (e.type == SDL_MOUSEMOTION && (SDL_GetModState() & KMOD_SHIFT)) {
+                    for (int y = 0; y < MAPSIZE; y++) {
+                        for (int x = 0; x < MAPSIZE; x++) {
+                            mapRect[x][y].x += e.motion.xrel;
+                            mapRect[x][y].y += e.motion.yrel;
+                        }
                     }
+
+                } else if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_i) {
+                    convertToFile(mapPoint);
+                } else if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_o) {
+                    loadFile(mapPoint, del);
                 }
             }
         }
+        if (!play) {
+            Uint32 mouseState = SDL_GetMouseState(NULL, NULL);
+            if (mouseState & SDL_BUTTON(SDL_BUTTON_LEFT)) {
+                int x, y;
+                SDL_GetMouseState(&x, &y);
+                mouse.x = x;
+                mouse.y = y;
+
+                if (x >= 0 && x <= imgW && y >= 0 && y <= imgH) {
+                    cout << x / TILE_SIZE << ":" << y / TILE_SIZE << endl;
+                    selectcRect.x = (x / TILE_SIZE) * TILE_SIZE;
+                    selectcRect.y = (y / TILE_SIZE) * TILE_SIZE;
+                }
+
+                for (int y = 0; y < MAPSIZE; y++) {
+                    for (int x = 0; x < MAPSIZE; x++) {
+                        if (SDL_PointInRect(&mouse, &mapRect[x][y])) {
+                            mapPoint[x][y].x = selectcRect.x;
+                            mapPoint[x][y].y = selectcRect.y;
+                        }
+                    }
+                }
+            }
+        }
+
 
         SDL_RenderClear(renderer);
 
@@ -173,9 +198,11 @@ int main(int argc, char *args[]) {
                 SDL_RenderCopy(renderer, tilemapTexture, &srcRect, &mapRect[x][y]);
             }
         }
+        if(!play)
         SDL_RenderCopy(renderer, tilemapTexture, NULL, &tileRect);
 
         SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+        if(!play)
         SDL_RenderDrawRect(renderer, &selectcRect);
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 
