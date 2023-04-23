@@ -2,11 +2,11 @@
 #include <SDL_image.h>
 #include <iostream>
 #include <fstream>
+#include "player.h"
 
 using namespace std;
 
 const int TILE_SIZE = 32;
-const int MAPSIZE = 16;
 const int SCREENW = 1000;
 const int SCREENH = 600;
 const char del = ',';
@@ -27,17 +27,14 @@ SDL_Texture *loadTexture(const std::string &path, SDL_Renderer *renderer) {
     return texture;
 }
 
-bool isDirt(SDL_Point p){
-    return (p.x == 32 && p.y == 224);
+bool isWall(SDL_Point p) {
+    return (p.x == 32 && p.y == 192);
 }
 
-bool isWall(SDL_Point p){
-    return(p.x == 32 && p.y == 192);
+bool isPlayer(SDL_Point p) {
+    return (p.x == 0 && p.y == 0) || ((p.x <= 7 * 32) && (p.y >= 32 && p.y <= 5 * 32));
 }
 
-void mine(SDL_Point arr[MAPSIZE][MAPSIZE]){
-
-}
 
 void convertToFile(SDL_Point arr[MAPSIZE][MAPSIZE]) {
     std::string output = "";
@@ -97,7 +94,8 @@ int main(int argc, char *args[]) {
     SDL_Init(SDL_INIT_VIDEO);
     IMG_Init(IMG_INIT_PNG);
 
-    SDL_Window *window = SDL_CreateWindow("Tile Selector", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREENW, SCREENH,
+    SDL_Window *window = SDL_CreateWindow("Tile Selector", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREENW,
+                                          SCREENH,
                                           SDL_WINDOW_SHOWN);
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
@@ -108,8 +106,11 @@ int main(int argc, char *args[]) {
     SDL_Rect selectcRect, srcRect;
     srcRect.w = srcRect.h = TILE_SIZE;
     selectcRect.w = selectcRect.h = TILE_SIZE;
+    selectcRect.x = selectcRect.y = 0;
 
     SDL_Point mouse;
+
+    player *p = nullptr;
 
     SDL_Point mapPoint[MAPSIZE][MAPSIZE];
     SDL_Rect mapRect[MAPSIZE][MAPSIZE];
@@ -134,13 +135,20 @@ int main(int argc, char *args[]) {
                 quit = true;
             } else if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_p) {
                 play = !play;
-                const int xP = SCREENW/2 - (MAPSIZE/2)*32;
-                const int yP = SCREENH/2 - (MAPSIZE/2)*32;
+                const int xP = SCREENW / 2 - (MAPSIZE / 2) * 32;
+                const int yP = SCREENH / 2 - (MAPSIZE / 2) * 32;
                 for (int y = 0; y < MAPSIZE; y++) {
                     for (int x = 0; x < MAPSIZE; x++) {
-                        mapRect[x][y].x = xP + x*32;
-                        mapRect[x][y].y = yP + y*32;
+                        mapRect[x][y].x = xP + x * 32;
+                        mapRect[x][y].y = yP + y * 32;
+                        if (play && isPlayer(mapPoint[x][y])) {
+                            p = new player(x, y, MAPSIZE, mapRect[x][y], mapPoint);
+                        }
                     }
+                }
+            } else if (play && p != nullptr) {
+                if (e.type == SDL_KEYDOWN) {
+                    p->handleMovement(e.key.keysym.sym);
                 }
             } else if (!play) {
                 if (e.type == SDL_MOUSEMOTION && (SDL_GetModState() & KMOD_SHIFT)) {
@@ -195,15 +203,18 @@ int main(int argc, char *args[]) {
                     mapPoint[x][y].x = srcRect.x = 32;
                     mapPoint[x][y].y = srcRect.y = 6 * 32;
                 }
+                 /*SDL_Point playerCheck = {srcRect.x, srcRect.y};
+                if (isPlayer(playerCheck)) {
+                    cout << "y";
+                } */
                 SDL_RenderCopy(renderer, tilemapTexture, &srcRect, &mapRect[x][y]);
             }
         }
-        if(!play)
-        SDL_RenderCopy(renderer, tilemapTexture, NULL, &tileRect);
-
+        if (!play)
+            SDL_RenderCopy(renderer, tilemapTexture, NULL, &tileRect);
         SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-        if(!play)
-        SDL_RenderDrawRect(renderer, &selectcRect);
+        if (!play)
+            SDL_RenderDrawRect(renderer, &selectcRect);
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 
         SDL_RenderPresent(renderer);

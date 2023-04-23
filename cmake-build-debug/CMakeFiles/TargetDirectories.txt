@@ -1,3 +1,3 @@
-/home/user/CLionProjects/mapEditor/cmake-build-debug/CMakeFiles/mapEditor.dir
-/home/user/CLionProjects/mapEditor/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/user/CLionProjects/mapEditor/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/Users/jonasluven/CLionProjects/mapedit/cmake-build-debug/CMakeFiles/mapEditor.dir
+/Users/jonasluven/CLionProjects/mapedit/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/jonasluven/CLionProjects/mapedit/cmake-build-debug/CMakeFiles/rebuild_cache.dir
