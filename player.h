@@ -1,23 +1,26 @@
 //
 // Created by Jonas Luven on 23.04.23.
 //
-#include <SDL.h>
-#ifndef MAPEDITOR_PLAYER_H
-#define MAPEDITOR_PLAYER_H
+#ifndef PLAYER_H
+#define PLAYER_H
 
-const int MAPSIZE = 16;
+#include <SDL.h>
+
+const int MAPSIZE = 10;
 
 class player {
 public:
-    player(int x, int y, int mapSize, SDL_Rect &rect, SDL_Point (&map)[MAPSIZE][MAPSIZE]);
+
+    player(int x, int y,SDL_Rect &rect, SDL_Rect (&rects)[MAPSIZE][MAPSIZE], SDL_Point (&map)[MAPSIZE][MAPSIZE]);
 
     void handleMovement(SDL_Keycode key);
 
 private:
     int posX, posY;
     int mapSize;
-    SDL_Rect *playerRect;
-    SDL_Point (&mapPoints)[MAPSIZE][MAPSIZE];
+    SDL_Rect * playerRect;
+    SDL_Point (*mapPoints)[MAPSIZE];
+    SDL_Rect (*mapRects)[MAPSIZE];
 };
 
-#endif //MAPEDITOR_PLAYER_H
+#endif

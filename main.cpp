@@ -142,7 +142,7 @@ int main(int argc, char *args[]) {
                         mapRect[x][y].x = xP + x * 32;
                         mapRect[x][y].y = yP + y * 32;
                         if (play && isPlayer(mapPoint[x][y])) {
-                            p = new player(x, y, MAPSIZE, mapRect[x][y], mapPoint);
+                           p = new player(x, y, mapRect[x][y],mapRect, mapPoint);
                         }
                     }
                 }
@@ -215,7 +215,7 @@ int main(int argc, char *args[]) {
         SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
         if (!play)
             SDL_RenderDrawRect(renderer, &selectcRect);
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
 
         SDL_RenderPresent(renderer);
     }
